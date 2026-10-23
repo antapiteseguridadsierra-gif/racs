@@ -1,0 +1,1081 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="RACS">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#14283A">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<title>RACS · Sierra Antapite SSO</title>
+<style>
+  :root{
+    --bg:#DDE4EB; --card:#fff; --ink:#0B1620; --soft:#33424F; --line:#C3CDD7; --field:#9FB0BE;
+    --navy:#14283A; --navy2:#1F3F5A; --amber:#F5A800; --amber-d:#C98600;
+    --danger:#C62828; --ok:#1E7A3A;
+    --alto:#D32F2F; --medio:#F5A800; --bajo:#2E9E4F;
+    --font:"Arial Narrow","Liberation Sans Narrow","Roboto Condensed","Arial Nova Condensed",-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+    --sat:env(safe-area-inset-top); --sab:env(safe-area-inset-bottom);
+  }
+  *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html{ -webkit-text-size-adjust:100%; }
+  body{ margin:0; background:var(--bg); color:var(--ink); font-family:var(--font); font-stretch:condensed; font-size:19px; line-height:1.35; -webkit-font-smoothing:antialiased; }
+  button,input,select,textarea{ font:inherit; font-stretch:inherit; color:inherit; }
+  input,select,textarea{ font-size:18px; }
+  .sr{ position:absolute; width:1px; height:1px; opacity:0; overflow:hidden; pointer-events:none; }
+  svg.ic{ width:21px; height:21px; fill:none; stroke:currentColor; stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; flex:none; }
+
+  /* Cabecera */
+  header.app{ position:sticky; top:0; z-index:30; background:var(--navy); color:#fff; padding:calc(10px + var(--sat)) 12px 10px; border-bottom:4px solid var(--amber); }
+  .top{ display:flex; align-items:center; gap:10px; min-height:44px; }
+  .top h1{ margin:0; font-size:23px; line-height:1.05; flex:1; letter-spacing:.02em; font-weight:800; }
+  .top h1 small{ display:block; font-size:12.5px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--amber); }
+  .ibtn{ width:44px; height:44px; border-radius:12px; border:none; background:rgba(255,255,255,.14); color:#fff; display:grid; place-items:center; cursor:pointer; }
+  .net{ font-size:13px; font-weight:800; padding:4px 11px; border-radius:99px; background:rgba(255,255,255,.16); color:#fff; }
+  .net.off{ background:var(--amber); color:#111; }
+  .pasos{ display:flex; gap:6px; margin-top:10px; }
+  .pasos i{ flex:1; height:6px; border-radius:3px; background:rgba(255,255,255,.22); }
+  .pasos i.on{ background:var(--amber); } .pasos i.hecho{ background:#fff; }
+  .fila-paso{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:8px; }
+  .paso-t{ font-size:14px; letter-spacing:.05em; text-transform:uppercase; font-weight:800; }
+  .badge{ font-size:13px; font-weight:800; padding:4px 11px; border-radius:99px; white-space:nowrap; background:rgba(255,255,255,.16); color:#fff; }
+  .badge.borrador{ background:rgba(255,255,255,.16); color:#fff; }
+  .badge.completo{ background:var(--amber); color:#111; }
+  .badge.pdf{ background:#fff; color:var(--navy); }
+
+  main{ max-width:760px; margin:0 auto; padding:14px 12px calc(120px + var(--sab)); }
+  .vista{ display:none; } .vista.on{ display:block; }
+  .paso{ display:none; } .paso.on{ display:block; }
+
+  /* Inicio */
+  .home{ text-align:center; padding:22px 6px 10px; }
+  .logo{ width:100px; height:100px; margin:0 auto 14px; border-radius:28px; background:var(--navy); display:grid; place-items:center; box-shadow:0 10px 24px rgba(20,40,58,.30); border-bottom:5px solid var(--amber); }
+  .logo svg{ width:60px; height:60px; }
+  .home h2{ margin:10px 0 0; font-size:50px; letter-spacing:.08em; color:var(--navy); line-height:1; font-weight:800; }
+  .home .emp{ display:inline-block; margin:8px 0 6px; padding:3px 14px; font-size:19px; font-weight:800; letter-spacing:.1em; background:var(--navy); color:#fff; border-radius:8px; text-transform:uppercase; }
+  .home p{ margin:6px auto 22px; max-width:320px; font-size:18px; color:var(--soft); }
+  .home .btn{ width:100%; max-width:380px; min-height:62px; font-size:21px; margin-bottom:12px; }
+  .home .cnt{ background:var(--navy); color:#fff; border-radius:99px; padding:1px 11px; font-size:16px; }
+  .offline{ max-width:380px; margin:14px auto 0; padding:10px 14px; border-radius:12px; border:1.5px solid var(--line); background:#fff; font-size:16px; font-weight:700; }
+  .offline.ok{ background:#E3F3E8; border-color:#8CC9A0; color:#14532D; }
+  .vers{ text-align:center; font-size:14px; font-weight:800; margin-top:10px; color:var(--soft); }
+
+  /* Tarjetas y campos */
+  .card{ background:var(--card); border:1.5px solid var(--line); border-radius:16px; padding:16px; margin-bottom:14px; box-shadow:0 2px 8px rgba(20,40,58,.07); }
+  .card h3{ margin:0 0 13px; padding:1px 0 1px 10px; border-left:5px solid var(--amber); color:var(--navy); font-size:15.5px; letter-spacing:.08em; text-transform:uppercase; font-weight:800; }
+  .campo{ margin-bottom:13px; } .campo:last-child{ margin-bottom:0; }
+  .campo > label{ display:block; font-size:16px; font-weight:800; margin-bottom:5px; color:var(--ink); }
+  .campo > label i{ color:var(--danger); font-style:normal; }
+  input[type=text],input[type=date],input[type=time],input[inputmode],select,textarea{
+    width:100%; min-height:52px; padding:10px 12px; border:1.5px solid var(--field); border-radius:12px; background:#F7F9FB; color:#000; appearance:none; -webkit-appearance:none;
+  }
+  select{ background-image:linear-gradient(45deg,transparent 50%,var(--navy) 50%),linear-gradient(135deg,var(--navy) 50%,transparent 50%); background-position:calc(100% - 20px) 50%,calc(100% - 14px) 50%; background-size:6px 6px; background-repeat:no-repeat; padding-right:36px; }
+  textarea{ min-height:120px; resize:vertical; }
+  input::placeholder,textarea::placeholder{ color:#5C6B78; }
+  input:focus,select:focus,textarea:focus{ outline:none; border-color:var(--navy); background:#fff; box-shadow:0 0 0 3px rgba(245,168,0,.45); }
+  .falta{ border-color:var(--danger) !important; background:#FDECEA !important; }
+  .dos{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  @media (max-width:420px){ .dos.rompe{ grid-template-columns:1fr; } }
+  .ayuda{ font-size:15px; color:var(--soft); margin-top:6px; }
+
+  .opciones{ display:grid; gap:8px; }
+  .c2{ grid-template-columns:1fr 1fr; } .c3{ grid-template-columns:repeat(3,1fr); }
+  .op{ min-height:58px; border:1.5px solid var(--field); background:#F7F9FB; border-radius:14px; font-weight:800; font-size:18.5px; cursor:pointer; padding:6px 8px; line-height:1.15; color:var(--ink); }
+  .op.on{ background:var(--navy); color:#fff; border-color:var(--navy); box-shadow:inset 0 -4px 0 var(--amber); }
+  .op[data-v="Alto"].on{ background:var(--alto); border-color:var(--alto); box-shadow:none; }
+  .op[data-v="Medio"].on{ background:var(--medio); border-color:var(--amber-d); color:#111; box-shadow:none; }
+  .op[data-v="Bajo"].on{ background:var(--bajo); border-color:var(--bajo); box-shadow:none; }
+
+  .btn{ display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:54px; padding:0 18px; border-radius:14px; border:1.5px solid var(--field); font-weight:800; font-size:18.5px; cursor:pointer; text-align:center; color:var(--navy); background:#fff; }
+  .btn:active{ transform:scale(.97); } .btn:disabled{ opacity:.5; }
+  .btn-sec{ background:#fff; }
+  .btn-pri{ background:var(--amber); border-color:var(--amber-d); color:#111; box-shadow:0 3px 0 var(--amber-d); }
+  .btn-ok{ background:var(--navy); border-color:var(--navy); color:#fff; }
+  .btn-peq{ min-height:44px; font-size:16px; padding:0 14px; }
+  .btn-peligro{ background:#fff; color:var(--danger); border-color:#E3A9A9; }
+  .fila{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+  .gps-ok{ font-size:15.5px; color:var(--ok); font-weight:800; }
+
+  /* Lista que se filtra al escribir */
+  .combo{ position:relative; }
+  .combo-list{ display:none; position:absolute; left:0; right:0; top:calc(100% + 4px); z-index:25; max-height:min(52vh,340px); overflow-y:auto; -webkit-overflow-scrolling:touch; background:#fff; border:2px solid var(--navy); border-radius:12px; box-shadow:0 14px 30px rgba(20,40,58,.28); padding:0; margin:0; }
+  .combo-list.ver{ display:block; }
+  .combo-list li{ list-style:none; padding:12px 14px; border-bottom:1px solid #E3E9EE; font-size:17.5px; line-height:1.2; cursor:pointer; }
+  .combo-list li:active,.combo-list li:hover{ background:#FFF1CC; }
+  .combo-list li.nada{ color:var(--soft); cursor:default; }
+  .combo-cuenta{ font-size:14px; color:var(--soft); margin-top:5px; }
+
+  /* Dictado */
+  .area-voz{ position:relative; }
+  .mic{ position:absolute; right:8px; bottom:8px; width:46px; height:46px; border-radius:50%; border:none; background:var(--navy); color:#fff; cursor:pointer; display:none; place-items:center; }
+  .mic.ver{ display:grid; } .mic.on{ background:var(--danger); animation:pulso 1s infinite; }
+  @keyframes pulso{ 50%{ box-shadow:0 0 0 8px rgba(198,40,40,.25); } }
+
+  /* Fotos */
+  .fotos{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:12px; }
+  .foto{ position:relative; aspect-ratio:1; border-radius:12px; overflow:hidden; border:1.5px solid var(--line); background:#ddd; }
+  .foto img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .foto button{ position:absolute; top:4px; right:4px; width:34px; height:34px; border-radius:50%; border:none; background:rgba(11,22,32,.82); color:#fff; font-size:21px; line-height:1; font-weight:800; cursor:pointer; }
+
+  /* Firma */
+  .firma-box{ position:relative; border:1.5px dashed var(--field); border-radius:12px; background:#fff; }
+  #firma{ width:100%; height:160px; display:block; touch-action:none; border-radius:12px; }
+  .firma-box .hint{ position:absolute; inset:0; display:grid; place-items:center; color:#6B7B87; pointer-events:none; font-size:17px; }
+
+  /* Barra inferior */
+  .barra{ position:fixed; left:0; right:0; bottom:0; z-index:30; background:var(--navy); border-top:3px solid var(--amber); padding:10px 12px calc(10px + var(--sab)); display:none; }
+  .barra.ver{ display:block; }
+  .barra .in{ max-width:760px; margin:0 auto; display:flex; gap:10px; }
+  .barra .btn{ flex:1; min-height:56px; font-size:19.5px; }
+  .barra .btn.chico{ flex:0 0 33%; background:rgba(255,255,255,.1); border-color:rgba(255,255,255,.35); color:#fff; box-shadow:none; }
+  .barra .btn.btn-ok{ background:#fff; color:var(--navy); border-color:#fff; }
+  .barra .estado{ position:absolute; top:-28px; left:10px; right:10px; text-align:center; font-size:13.5px; font-weight:800; background:var(--navy); color:#fff; border-radius:8px; padding:2px 6px; }
+  .barra .estado:empty{ display:none; }
+
+  /* Guardados */
+  .filtros{ display:flex; gap:8px; overflow-x:auto; padding-bottom:6px; margin-bottom:10px; }
+  .filtro{ flex:none; border:1.5px solid var(--field); background:#fff; border-radius:99px; padding:8px 16px; font-weight:800; font-size:16px; cursor:pointer; color:var(--navy); }
+  .filtro.on{ background:var(--navy); color:#fff; border-color:var(--navy); }
+  .barra-dia{ background:#fff; border:1.5px solid var(--line); border-radius:14px; padding:12px; margin-bottom:12px; }
+  .barra-dia .fila > *{ flex:1 1 140px; }
+  .item{ background:#fff; border:1.5px solid var(--line); border-left:8px solid var(--field); border-radius:14px; padding:13px 14px; margin-bottom:10px; }
+  .item.r-Bajo{ border-left-color:var(--bajo); } .item.r-Medio{ border-left-color:var(--medio); } .item.r-Alto{ border-left-color:var(--alto); }
+  .item .cab{ display:flex; justify-content:space-between; gap:8px; font-size:15px; }
+  .item .tit{ font-weight:800; font-size:18.5px; margin:3px 0; }
+  .item .det{ font-size:16.5px; color:var(--soft); display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+  .tag{ display:inline-block; font-size:14px; font-weight:800; padding:2px 9px; border-radius:99px; margin:6px 5px 0 0; background:#E8EDF2; color:var(--navy); }
+  .tag.borrador{ background:#E8EDF2; } .tag.completo{ background:#FFE9A8; color:#5A3D00; } .tag.pdf{ background:var(--navy); color:#fff; }
+  .item .acc{ display:flex; gap:8px; margin-top:10px; flex-wrap:wrap; }
+  .vacio{ text-align:center; padding:50px 20px; font-weight:700; color:var(--soft); }
+
+  .toast{ position:fixed; left:50%; bottom:calc(100px + var(--sab)); transform:translate(-50%,20px); background:var(--navy); color:#fff; padding:12px 18px; border-radius:12px; font-size:17.5px; font-weight:700; opacity:0; pointer-events:none; transition:.25s; z-index:80; max-width:90vw; text-align:center; border-bottom:3px solid var(--amber); }
+  .toast.ver{ opacity:1; transform:translate(-50%,0); } .toast.err{ background:var(--danger); border-bottom-color:#7F1414; }
+
+  /* Ventana de PDF / imagen */
+  .modal{ position:fixed; inset:0; background:rgba(11,22,32,.6); display:none; align-items:center; justify-content:center; z-index:70; padding:20px; }
+  .modal.ver{ display:flex; }
+  .caja{ background:#fff; border-radius:20px; padding:24px 20px 18px; width:100%; max-width:380px; max-height:92vh; overflow-y:auto; text-align:center; border-top:6px solid var(--amber); }
+  .caja h4{ margin:0 0 4px; font-size:23px; color:var(--navy); } .caja p{ margin:0 0 16px; font-size:16px; word-break:break-word; color:var(--soft); }
+  .caja .btn{ width:100%; margin-bottom:9px; }
+  .caja .sep{ font-size:13.5px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; text-align:left; margin:8px 0 7px; color:var(--navy); border-bottom:1.5px solid var(--line); padding-bottom:4px; }
+
+  /* Plantilla del PDF / imagen (fuera de pantalla). Todas las hojas miden igual. */
+  #pdfTpl{ position:fixed; left:-12000px; top:0; width:1100px; }
+  .p-sheet{ width:1100px; min-height:780px; background:#DDE4EB; padding:24px; color:#0B1620; font-family:"Arial Narrow","Liberation Sans Narrow","Roboto Condensed","Arial Nova Condensed","Helvetica Neue",Arial,sans-serif; font-stretch:condensed; line-height:1.3; display:flex; flex-direction:column; }
+  .p-head{ background:#14283A; color:#fff; border-radius:12px; padding:18px 26px; display:flex; justify-content:space-between; align-items:center; border-bottom:6px solid #F5A800; }
+  .p-head .a{ font-size:15px; letter-spacing:.14em; font-weight:800; text-transform:uppercase; color:#F5A800; }
+  .p-head .b{ font-size:30px; font-weight:800; }
+  .p-head .c{ text-align:right; font-size:19px; } .p-head .c b{ font-size:24px; display:block; color:#F5A800; }
+  .p-grid{ display:grid; grid-template-columns:1fr 1.25fr 1fr; gap:18px; align-items:stretch; margin-top:20px; flex:1; }
+  .p-card{ background:#fff; border:2px solid #B7C3CE; border-radius:12px; padding:18px; }
+  .p-l{ font-size:14px; font-weight:800; letter-spacing:.07em; text-transform:uppercase; margin:13px 0 5px; color:#14283A; }
+  .p-card > .p-l:first-child{ margin-top:0; }
+  .p-v{ background:#F3F5F8; border:1.5px solid #C5CFD8; border-radius:8px; padding:9px 12px; font-size:19.5px; color:#000; min-height:42px; white-space:pre-wrap; overflow-wrap:anywhere; }
+  .p-v.big{ min-height:120px; }
+  .p-sub{ display:block; font-size:16.5px; font-weight:800; background:#14283A; color:#fff; border-radius:6px; padding:3px 12px; margin:18px 0 0; letter-spacing:.06em; }
+  .p-sub.primero{ margin-top:0; }
+  .p-sub + .p-l{ margin-top:12px; }
+  .p-2{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .p-risk{ font-weight:800; font-size:21px; text-transform:uppercase; border-color:transparent; text-align:center; }
+  .p-r-Alto{ background:#D32F2F; color:#fff; } .p-r-Medio{ background:#F5A800; color:#111; } .p-r-Bajo{ background:#2E9E4F; color:#fff; }
+  .p-fotos{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .p-fotos.uno{ grid-template-columns:1fr; }
+  .p-fotos img{ width:100%; border-radius:8px; border:1.5px solid #B7C3CE; display:block; }
+  .p-firma{ margin-top:14px; border-top:2px solid #C5CFD8; padding-top:10px; }
+  .p-firma img{ height:70px; display:block; }
+  .p-pie{ margin-top:16px; text-align:center; font-size:14.5px; font-weight:700; color:#33424F; }
+  table.p-tab{ width:100%; border-collapse:collapse; background:#fff; font-size:19px; margin-top:6px; }
+  table.p-tab th{ background:#14283A; color:#fff; border:1.5px solid #14283A; padding:9px 10px; text-align:left; font-size:15px; text-transform:uppercase; letter-spacing:.05em; }
+  table.p-tab td{ border:1.5px solid #C5CFD8; padding:9px 10px; vertical-align:top; }
+  table.p-tab tr:nth-child(even) td{ background:#F3F5F8; }
+  .p-chip{ display:inline-block; font-size:17px; font-weight:800; background:#14283A; color:#fff; border-radius:6px; padding:3px 12px; margin:22px 0 14px; }
+</style>
+</head>
+<body>
+
+<header class="app">
+  <div class="top">
+    <button type="button" class="ibtn" id="btnInicio" aria-label="Volver al inicio" style="display:none"><svg class="ic" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
+    <h1 id="tituloApp"><small>Sierra Antapite · SSO</small>RACS</h1>
+    <span class="net" id="net">En línea</span>
+  </div>
+  <div id="pasosWrap" style="display:none">
+    <div class="pasos" id="pasos"><i></i><i></i><i></i></div>
+    <div class="fila-paso"><div class="paso-t" id="pasoTitulo"></div><span class="badge borrador" id="badgeEstado">Borrador</span></div>
+  </div>
+</header>
+
+<main>
+  <!-- INICIO -->
+  <section class="vista on" id="v-home">
+    <div class="home">
+      <div class="logo">
+        <svg viewBox="0 0 48 48" fill="none"><circle cx="36" cy="12" r="5" fill="#F5A800"/><path d="M2 38L15 16L23 28L29 18L46 38H2Z" fill="#E6ECF1"/><path d="M23 28L29 18L46 38H23V28Z" fill="#7C98AE"/></svg>
+      </div>
+      <h2>RACS</h2>
+      <div class="emp">Sierra Antapite · SSO</div>
+      <p>Reporte de actos y condiciones subestándar</p>
+      <button type="button" class="btn btn-sec" id="hContinuar" style="display:none"></button>
+      <button type="button" class="btn btn-pri" id="hNuevo"><svg class="ic" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Nuevo reporte</button>
+      <button type="button" class="btn btn-sec" id="hLista">Historial y guardados <span class="cnt" id="contador">0</span></button>
+      <div class="offline" id="offTxt">Revisando modo sin internet…</div>
+      <div class="vers" id="verTxt"></div>
+    </div>
+  </section>
+
+  <!-- FORMULARIO -->
+  <section class="vista" id="v-form">
+
+    <div class="paso on" data-paso="1">
+      <div class="card">
+        <h3>Tipo de reporte</h3>
+        <div class="campo">
+          <div class="opciones c2" data-grupo="tipo" id="g-tipo">
+            <button type="button" class="op" data-v="Acto subestándar">Acto<br>subestándar</button>
+            <button type="button" class="op" data-v="Condición subestándar">Condición<br>subestándar</button>
+          </div>
+          <div class="ayuda">Acto: lo que hace una persona. Condición: lo que hay en el lugar o equipo.</div>
+        </div>
+        <div class="campo">
+          <label for="categoria">Clasificación tipo causa <i>*</i></label>
+          <div class="combo" id="combo">
+            <input type="text" id="categoria" placeholder="Escribe: orden, vola, sosten…" autocomplete="off" autocapitalize="none" spellcheck="false" enterkeyhint="done">
+            <ul class="combo-list" id="comboLista" role="listbox"></ul>
+          </div>
+          <div class="combo-cuenta" id="comboCuenta">Escribe parte de la palabra y elige de la lista.</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Dónde y cuándo</h3>
+        <div class="campo"><label for="area">Área <i>*</i></label><select id="area" data-k="area"></select></div>
+        <div class="campo"><label for="ubicacion">Lugar <i>*</i></label><input type="text" id="ubicacion" data-k="ubicacion" placeholder="Ej.: Bypass 533S, Nivel 3800" autocomplete="off"></div>
+        <div class="dos">
+          <div class="campo"><label for="fecha">Fecha <i>*</i></label><input type="date" id="fecha" data-k="fecha"></div>
+          <div class="campo"><label for="hora">Hora <i>*</i></label><input type="time" id="hora" data-k="hora"></div>
+        </div>
+        <div class="campo">
+          <div class="fila">
+            <button type="button" class="btn btn-sec btn-peq" id="btnGps"><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="8"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>Capturar GPS</button>
+            <span class="gps-ok" id="gpsTxt"></span>
+          </div>
+          <div class="ayuda">Opcional. Dentro de la mina normalmente no hay señal GPS.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="paso" data-paso="2">
+      <div class="card">
+        <h3>Descripción</h3>
+        <div class="campo">
+          <label for="descripcion">¿Qué observaste? <i>*</i></label>
+          <div class="area-voz">
+            <textarea id="descripcion" data-k="descripcion" placeholder="Qué pasó o qué encontraste, dónde y quién estaba expuesto."></textarea>
+            <button type="button" class="mic" id="btnMic" aria-label="Dictar por voz"><svg class="ic" viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v4"/></svg></button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Nivel de riesgo</h3>
+        <div class="campo">
+          <div class="opciones c3" data-grupo="riesgo" id="g-riesgo">
+            <button type="button" class="op" data-v="Alto">Alto</button>
+            <button type="button" class="op" data-v="Medio">Medio</button>
+            <button type="button" class="op" data-v="Bajo">Bajo</button>
+          </div>
+        </div>
+        <div class="campo"><label for="riesgoCritico">Riesgos críticos</label><select id="riesgoCritico" data-k="riesgoCritico"></select></div>
+      </div>
+
+      <div class="card">
+        <h3>Evidencia</h3>
+        <div class="fila">
+          <label class="btn btn-pri" for="inFoto"><svg class="ic" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>Tomar foto</label>
+          <label class="btn btn-sec" for="inGaleria">Elegir de galería</label>
+        </div>
+        <input type="file" id="inFoto" class="sr" accept="image/*" capture="environment">
+        <input type="file" id="inGaleria" class="sr" accept="image/*" multiple>
+        <div class="fotos" id="fotos"></div>
+        <div class="ayuda" id="fotoAyuda"></div>
+      </div>
+
+      <div class="card">
+        <h3>Acciones</h3>
+        <div class="campo"><label for="acciones">Acciones a tomar</label><textarea id="acciones" data-k="acciones" placeholder="Qué se hizo o qué se debe hacer para corregirlo."></textarea></div>
+      </div>
+    </div>
+
+    <div class="paso" data-paso="3">
+      <div class="card">
+        <h3>Reportante</h3>
+        <div class="campo"><label for="dni">DNI</label><input type="text" id="dni" data-k="dni" inputmode="numeric" maxlength="12" autocomplete="off"></div>
+        <div class="campo"><label for="nombre">Nombres y apellidos <i>*</i></label><input type="text" id="nombre" data-k="nombre" autocomplete="name"></div>
+        <div class="dos rompe">
+          <div class="campo"><label for="empresa">Empresa</label><input type="text" id="empresa" data-k="empresa" autocomplete="organization"></div>
+          <div class="campo"><label for="areaRep">Área</label><select id="areaRep" data-k="areaRep"></select></div>
+        </div>
+        <div class="campo"><label for="cargo">Cargo</label><input type="text" id="cargo" data-k="cargo" autocomplete="organization-title"></div>
+      </div>
+
+      <div class="card">
+        <h3>Reportado (si aplica)</h3>
+        <div class="campo"><label for="repNombre">Nombres y apellidos</label><input type="text" id="repNombre" data-k="repNombre" placeholder="Persona observada" autocomplete="off"></div>
+        <div class="dos rompe">
+          <div class="campo"><label for="repEmpresa">Empresa</label><input type="text" id="repEmpresa" data-k="repEmpresa" autocomplete="off"></div>
+          <div class="campo"><label for="repArea">Área</label><select id="repArea" data-k="repArea"></select></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Firma del reportante</h3>
+        <div class="firma-box"><canvas id="firma"></canvas><div class="hint" id="firmaHint">Firma aquí con el dedo</div></div>
+        <div class="fila" style="margin-top:8px"><button type="button" class="btn btn-sec btn-peq" id="btnBorrarFirma">Borrar firma</button></div>
+      </div>
+
+      <button type="button" class="btn btn-sec" id="btnGuardarSalir" style="width:100%">Guardar y salir</button>
+    </div>
+  </section>
+
+  <!-- HISTORIAL -->
+  <section class="vista" id="v-lista">
+    <div class="barra-dia">
+      <div class="fila">
+        <select id="fFecha" aria-label="Filtrar por fecha"></select>
+        <button type="button" class="btn btn-ok btn-peq" id="btnPdfDia">PDF / imágenes del día</button>
+      </div>
+      <div class="ayuda" id="resumenDia"></div>
+    </div>
+    <div class="filtros" id="filtros">
+      <button class="filtro on" data-f="todos" type="button">Todos</button>
+      <button class="filtro" data-f="Alto" type="button">Alto</button>
+      <button class="filtro" data-f="Medio" type="button">Medio</button>
+      <button class="filtro" data-f="Bajo" type="button">Bajo</button>
+      <button class="filtro" data-f="borrador" type="button">Borradores</button>
+    </div>
+    <div class="fila" style="margin-bottom:12px">
+      <button type="button" class="btn btn-sec btn-peq" id="btnCsv"><svg class="ic" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Exportar a Excel (CSV)</button>
+    </div>
+    <div id="lista"></div>
+  </section>
+</main>
+
+<div class="barra" id="barra">
+  <div class="estado" id="estadoGuardado"></div>
+  <div class="in">
+    <button type="button" class="btn btn-sec chico" id="btnAtras">Atrás</button>
+    <button type="button" class="btn btn-pri" id="btnSig">Siguiente</button>
+  </div>
+</div>
+
+<div class="modal" id="modalPdf">
+  <div class="caja">
+    <h4>Listo ✓</h4>
+    <p id="pdfNombre"></p>
+    <div class="sep">PDF</div>
+    <button type="button" class="btn btn-ok" id="btnCompartir">Compartir PDF</button>
+    <button type="button" class="btn btn-sec" id="btnDescargar">Descargar PDF</button>
+    <div id="bloqueImg">
+      <div class="sep" id="sepImg">Imagen</div>
+      <button type="button" class="btn btn-pri" id="btnCompImg">Compartir imagen</button>
+      <button type="button" class="btn btn-sec" id="btnDescImg">Descargar imagen</button>
+    </div>
+    <button type="button" class="btn btn-sec" id="btnCerrarPdf">Cerrar</button>
+  </div>
+</div>
+
+<div id="pdfTpl" aria-hidden="true"></div>
+<div class="toast" id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" async></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" async></script>
+<script>
+/* =========================================================
+   RACS — Sierra Antapite SSO
+   Todo se guarda en el propio teléfono (IndexedDB) y la app
+   funciona sin internet gracias a sw.js
+   ========================================================= */
+var LIBS = [
+  "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js",
+  "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"
+];
+var CATEGORIAS = [
+"ACARREO Y TRANSPORTE","ALIMENTACIÓN DE BOLAS Y/O BARRAS A MOLINOS","ARMADO DE CIMBRA",
+"ATRAPADO POR DERRUMBE, DESLIZAMIENTO, SOPLADO DE MINERAL O DESMONTE","ATRAPAMIENTO SIN DAÑO (DENTRO, FUERA, ENTRE, DEBAJO)",
+"BAJO LA INFLUENCIA DEL ALCOHOL Y / U OTRAS DROGAS","BARANDAS / CERCOS / ANCLAJES","BLOQUEO Y ROTULACION","BOMBAS / TUBERIAS",
+"CAIDA DE OBJETOS","CAIDA DE PERSONAS",
+"CAÍDAS DE CABLES DE ALTA TENSIÓN - CONTACTO DE MAQUINARIAS O PARTE DE ELLAS CON CABLES DE ALTA TENSIÓN",
+"CAÍDAS DE CARGAS IZADAS (CONTENEDORES, PAQUETES DESCARGAS, ETC)","CANDADO / HERRAMIENTAS DE SEGURIDAD","CARGA INCORRECTA","CARGA Y DESCARGA",
+"CHOQUE DE VEHÍCULOS DE TRABAJO","COLOCACIÓN INCORRECTA","CONDICIONES AMBIENTALES PELIGROSAS","CONGESTIÓN O ACCIÓN RESTRINGIDA",
+"CUANDO EL PETS EN DESARROLLO DE LA ACTIVIDAD NO TIENE ALCANCE PARA EL CONTROL DE RIESGO","DAR SERVICIO A EQUIPO EN FUNCIONAMIENTO",
+"DENUNCIAS POR PROBLEMAS SOCIO AMBIENTALES",
+"DERRAME, ESCAPES, FUGAS DE MATERIALES PELIGROSOS (CORROSIVOS, REACTIVOS, EXPLOSIVOS, TÓXICOS, INFLAMABLE, BIOLÓGICOS PATÓGENOS)",
+"DERRUMBE DE UNA CONSTRUCCIÓN","DERRUMBE DE UNA MINA","DERRUMBES (ZANJAS, TALUDES, CALZADURAS, EXCAVACIONES, DE TERRENOS EN GENERAL, ETC)",
+"DESACOPLE DE TUBERIA","DESACTIVACIÓN DE TIROS CORTADOS / FALLADOS","DESACTIVAR DISPOSITIVOS DE SEGURIDAD",
+"DESASTRES DE ORIGEN ANTROPOGÉNICO (AÉREO, MARÍTIMO)","DESASTRES DE ORIGEN NATURAL (SISMOS, FLUVIALES, PLUVIALES, TERRESTRE)",
+"DESATORO DE TOLVAS","DESPLOMES ESTRUCTURALES, INSTALACIONES, PRODUCTOS ALMACENADOS","DESPRENDIMIENTO DE ROCAS","DISPARO FUERA DE HORARIO",
+"DISTURBACION DE AREAS NATURALES O CERRADAS","EMISION DE GASES DE COMBUSTION, FUNDICION, VAPORES QUIMICOS POR ENCIMA DE LOS LMP",
+"ENERGIA ELECTRICA","EPIDEMIAS / INTOXICACIONES MASIVAS","EPP EN MAL ESTADO","EQUIPO DE PROTECCIÓN INCORRECTO O INADECUADO",
+"ESFUERZOS EXCESIVOS O FALSOS MOVIMIENTOS","EXCAVACIONES MAYORES O IGUALES DE 1.50 METROS","EXPLOSIONES","EXPLOSIVOS",
+"EXPOSICIÓN A, O CONTACTO CON RADIACIONES","EXPOSICIÓN A, O CONTACTO CON SUSTANCIAS PELIGROSAS","EXPOSICIÓN A, O CONTACTO CON TORMENTAS ELECTRICAS",
+"EXPOSICIÓN A, O CONTACTO POR INGESTIÓN DE ALIMENTOS (INTOXICACIÓN)","EXPOSICIÓN AL RUIDO","FALSA ALARMA","FALTA / FALLA DE SOSTENIMIENTO",
+"FALTA / FALLA EN COMUNICACIONES","FALTA DE EXTINTORES","FALTA DE IMPLEMENTOS DE SEGURIDAD","FALTA DE VENTILACION","FALTA ILUMINACION",
+"FALTA ORDEN Y LIMPIEZA","GASES TOXICOS","GENERACION DE POLVO EXCESIVO","GOLPES POR OBJETOS EN DETONACIÓN DE EXPLOSIVOS",
+"GUARDAS O BARRERAS INADECUADAS","HERRAMIENTAS EN MAL ESTADO","INCENDIOS","INCURSIONES TERRORISTAS/ATENTADOS/SABOTAJES",
+"INSPECCIÓN, MANTENIMIENTO Y/O REPARACIÓN EN PIQUE","INSTAL. DEFICIENTE AGUA Y LUZ","IZAJE DE CARGAS CRÍTICAS",
+"IZAMIENTO DE EQUIPOS MAYORES A 200 KILOS","JUGUETEO","LAMPARA EN MAL ESTADO","LEVANTAR INCORRECTAMENTE","LIMPIEZA DE TALADROS LARGOS",
+"LIMPIEZA DE TOLVAS","LUBRICANTES","MAL ESTADO DE EQUIPOS / MAQUINARIAS","MANIPULACION DE MATERIALES","MANTENIMIENTO DEFICIENTE",
+"MANTENIMIENTO Y REPARACIÓN DE CHIMENEAS","MONTAJE Y DESMONTAJE DE CHANCADORA","NO REALIZA HERRAMIENTAS DE GESTION DE SEGURIDAD",
+"NO USAR EL EPP CORRECTAMENTE","NO UTILIZAR EPP","OMISIÓN DE ADVERTIR","OMISIÓN DE ASEGURAR","OPERACION DE MAQUINARIAS",
+"OPERAR A VELOCIDAD INDEBIDA","OPERAR EQUIPO SIN AUTORIZACIÓN","PERFORACION","PERFORACIÓN DE TALADROS LARGOS","PERSONAL NO AUTORIZADO",
+"PISOS / PAREDES / TECHOS / CAMINOS / ACCESOS","POSICIÓN INDEBIDA","PROTEC. INSEGURA DE MAQUINARIAS","PRUEBA DE LEONAS",
+"RECUPERACION DE INUNDACIONES CON BOMBEO","RECUPERACIÓN DE LABORES CON GASES",
+"REHABILITACIÓN DE LABORES ANTIGUAS Y/O LABORES PARALIZADAS TEMPORALMENTE","RELLENO DE TALADROS LARGOS",
+"REMOLQUE DE EQUIPOS Y VEHÍCULOS EN INTERIOR MINA","SEÑALIZACION","SINTOMAS DE EBRIEDAD","SISTEMA DE ADVERTENCIA INADECUADO",
+"SITUACIONES DE CONMOCIÓN CIVIL / MOTINES","SUCCION DE MINERAL / DESMONTE","TECHO MUY ALTO","TEMPERATURAS EXTREMAS","TIROS CORTADOS",
+"TORMENTAS ELÉCTRICAS INUSUALES","TRABAJO MANTENIMIENTO WINCHE MINERAL","TRABAJOS CON CIANURO DE SODIO",
+"TRABAJOS DE MANTENIMIENTO EN LÍNEA DE ALTA TENSIÓN","TRABAJOS DE RECUPERACIÓN DE PUENTES Y PILARES",
+"TRABAJOS DE TENDIDO DE CABLES ELÉCTRICOS , TUBERÍAS Y OTROS POR CHIMENEA","TRABAJOS EN ALTURA CON MANITOU",
+"TRABAJOS EN ALTURA MAYORES A 5 METROS","TRABAJOS EN ALTURA MENOR O IGUAL A 5 METROS","TRABAJOS EN ALTURA Y TRABAJOS EN CALIENTE",
+"TRABAJOS EN ALTURA","TRABAJOS EN CALIENTE Y TRABAJOS EN ESPACIO CONFINADO","TRABAJOS EN CALIENTE",
+"TRABAJOS EN CALIENTE PRÓXIMOS A MATERIALES INFLAMABLES","TRABAJOS EN ESPACIOS CONFINADOS",
+"TRABAJOS EN ESPACIOS CONFINADOS Y TRABAJOS EN CALIENTE","TRABAJOS EN OPERACIONES NOCTURNAS NO RUTINARIAS",
+"TRABAJOS EN TALUDES CUYA INCLINACIÓN SUPERA LOS 30 GRADOS",
+"TRABAJOS NO RUTINARIOS, EVENTUALES CUYA EVALUACION DE SU IPERC CONTINUO VAN DE 01 A 08","TRANSITO",
+"TRASLADO DE EQUIPOS DE DIAMANTINA (DDHH) DENTRO DE LAS INSTALACIONES DE LA EMPRESA",
+"TRASLADO DE EQUIPOS PESADOS EN SUPERFICIE EN HORARIO NOCTURNO (SCOOP, DUMPER, JUMBOS)","USAR EQUIPO DEFECTUOSO","USO INDEBIDO DEL EQUIPO",
+"VIA EN MAL ESTADO","VOLADURA CON EXPLOSIVO NO RUTINARIO","VOLADURA DE TALADROS LARGOS","VOLADURA EN VÍAS PRINCIPALES DE INTEROR MINA",
+"VOLADURA SECUNDARIA","VOLCADURA CON EXPLOSIVOS SIN PREVIO AVISO","VOLCADURA DE BOTELLAS PRESURIZADAS"
+];
+var AREAS = ["ACOPIO","ALMACEN","GEOLOGIA","GERENCIA","GESTION HUMANA","LABORATORIO","LEGAL","MANTENIMIENTO","MEDIO AMBIENTE","MINA","PLANEAMIENTO","PLANTA","PRO. PATRIMONIAL","SIS","SSO","TI"];
+var RIESGOS_CRITICOS = ["BLOQUEO Y AISLAMIENTO DE ENERGÍAS","CAÍDA DE ROCAS","CARGAS SUSPENDIDAS","EQUIPOS Y VEHÍCULOS EN MOVIMIENTO","ESPACIOS CONFINADOS","GASEAMIENTO SUBTERRÁNEO","GUARDAS DE PROTECCIÓN","HERRAMIENTAS MANUALES Y DE PODER","MANEJO DE EXPLOSIVOS","SUSTANCIAS QUÍMICAS PELIGROSAS","TRABAJO EN CALIENTE","TRABAJOS EN ALTURA"];
+var TITULOS = { 1:"Paso 1 de 3 · Qué y dónde", 2:"Paso 2 de 3 · Detalle y evidencia", 3:"Paso 3 de 3 · Personas y firma" };
+var MAX_FOTOS = 6;
+var rep = null, guardadoTimer = null, lista = [], filtroActual = "todos", paso = 1, salida = null;
+
+/* ---------- Utilidades ---------- */
+function $(id){ return document.getElementById(id); }
+function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+function esc(t){ var d = document.createElement("div"); d.textContent = t == null ? "" : t; return d.innerHTML; }
+function p2(n){ return String(n).padStart(2,"0"); }
+function hoyISO(){ var d = new Date(); return d.getFullYear()+"-"+p2(d.getMonth()+1)+"-"+p2(d.getDate()); }
+function horaAhora(){ var d = new Date(); return p2(d.getHours())+":"+p2(d.getMinutes()); }
+function fechaLarga(iso){ if(!iso) return ""; var a = iso.split("-"); return a[2]+"/"+a[1]+"/"+a[0]; }
+function norm(s){ return (s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase(); }
+function slug(t){ return (t||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-zA-Z0-9]+/g,"-").replace(/^-+|-+$/g,""); }
+var toastT;
+function toast(msg, err){
+  var t = $("toast"); t.textContent = msg; t.className = "toast ver" + (err ? " err" : "");
+  clearTimeout(toastT); toastT = setTimeout(function(){ t.className = "toast"; }, 3000);
+}
+function llenarSelect(id, opciones, vacio){
+  $(id).innerHTML = '<option value="">' + vacio + '</option>' + opciones.map(function(o){ return '<option>'+esc(o)+'</option>'; }).join("");
+}
+llenarSelect("area", AREAS, "— elegir —");
+llenarSelect("areaRep", AREAS, "— elegir —");
+llenarSelect("repArea", AREAS, "— elegir —");
+llenarSelect("riesgoCritico", RIESGOS_CRITICOS, "— ninguno / elegir —");
+
+/* ---------- Base de datos local ---------- */
+var _db = null;
+function abrirDB(){
+  if(_db) return Promise.resolve(_db);
+  return new Promise(function(res, rej){
+    var rq = indexedDB.open("racs-antapite", 1);
+    rq.onupgradeneeded = function(){ rq.result.createObjectStore("reportes", { keyPath:"id" }); };
+    rq.onsuccess = function(){ _db = rq.result; res(_db); };
+    rq.onerror = function(){ rej(rq.error); };
+  });
+}
+function tx(modo, fn){
+  return abrirDB().then(function(db){
+    return new Promise(function(res, rej){
+      var t = db.transaction("reportes", modo), r = fn(t.objectStore("reportes"));
+      t.oncomplete = function(){ res(r && r.result); };
+      t.onerror = function(){ rej(t.error); };
+    });
+  });
+}
+function dbGuardar(r){ return tx("readwrite", function(s){ return s.put(r); }); }
+function dbBorrar(id){ return tx("readwrite", function(s){ return s.delete(id); }); }
+function dbTodos(){ return tx("readonly", function(s){ return s.getAll(); }); }
+
+/* ---------- Reporte ---------- */
+function siguienteCodigo(){
+  var d = hoyISO().replace(/-/g,""), k = "racs:contador:" + d;
+  var n = (parseInt(localStorage.getItem(k) || "0", 10)) + 1;
+  localStorage.setItem(k, String(n));
+  return "RACS-" + d + "-" + String(n).padStart(3,"0");
+}
+function perfil(){ try{ return JSON.parse(localStorage.getItem("racs:perfil") || "{}"); }catch(e){ return {}; } }
+function base(){
+  return {
+    id:"", codigo:"", creado:0, actualizado:0, pdfHecho:0, tipo:"", categoria:"", area:"", ubicacion:"", fecha:"", hora:"",
+    lat:null, lng:null, precision:null, descripcion:"", riesgo:"", riesgoCritico:"", fotos:[], acciones:"",
+    nombre:"", dni:"", cargo:"", empresa:"", areaRep:"", repNombre:"", repEmpresa:"", repArea:"", firma:""
+  };
+}
+function nuevoReporte(){
+  var pf = perfil(), r = base();
+  r.id = uid(); r.creado = r.actualizado = Date.now(); r.fecha = hoyISO(); r.hora = horaAhora();
+  r.nombre = pf.nombre || ""; r.dni = pf.dni || ""; r.cargo = pf.cargo || ""; r.empresa = pf.empresa || ""; r.areaRep = pf.areaRep || "";
+  return r;
+}
+function completar(r){ return Object.assign(base(), r); }
+function tieneContenido(){
+  return !!(rep.tipo || rep.categoria || rep.descripcion.trim() || rep.ubicacion.trim() || rep.fotos.length || rep.firma || rep.acciones.trim());
+}
+var PASO_DE = { tipo:1, categoria:1, area:1, ubicacion:1, fecha:1, hora:1, riesgo:2, descripcion:2, nombre:3 };
+function faltantesDe(r){
+  var f = [];
+  if(!r.tipo) f.push("tipo");
+  if(CATEGORIAS.indexOf(r.categoria) < 0) f.push("categoria");
+  if(!r.area) f.push("area");
+  if(!(r.ubicacion||"").trim()) f.push("ubicacion");
+  if(!r.fecha) f.push("fecha");
+  if(!r.hora) f.push("hora");
+  if(!r.riesgo) f.push("riesgo");
+  if(!(r.descripcion||"").trim()) f.push("descripcion");
+  if(!(r.nombre||"").trim()) f.push("nombre");
+  return f;
+}
+function elDe(k){ return (k === "tipo" || k === "riesgo") ? $("g-" + k) : $(k); }
+function marcar(l){
+  document.querySelectorAll(".falta").forEach(function(e){ e.classList.remove("falta"); });
+  l.forEach(function(k){ var e = elDe(k); if(e) e.classList.add("falta"); });
+}
+function estadoDe(r){
+  var f = faltantesDe(r).length;
+  if(f) return { c:"borrador", t:"Borrador · faltan " + f, corto:"Borrador" };
+  if(r.pdfHecho) return { c:"pdf", t:"PDF generado", corto:"PDF generado" };
+  return { c:"completo", t:"Completo", corto:"Completo" };
+}
+function pintarEstado(){
+  var e = estadoDe(rep), b = $("badgeEstado");
+  b.textContent = e.t; b.className = "badge " + e.c;
+}
+
+/* ---------- Pintar ---------- */
+function pintarOpciones(){
+  document.querySelectorAll("[data-grupo]").forEach(function(g){
+    var k = g.getAttribute("data-grupo");
+    g.querySelectorAll(".op").forEach(function(b){ b.classList.toggle("on", b.getAttribute("data-v") === rep[k]); });
+  });
+}
+function pintarFotos(){
+  var c = $("fotos"); c.innerHTML = "";
+  rep.fotos.forEach(function(src, i){
+    var d = document.createElement("div"); d.className = "foto";
+    var im = document.createElement("img"); im.src = src; im.alt = "Foto " + (i+1);
+    var b = document.createElement("button"); b.type = "button"; b.innerHTML = "&times;"; b.setAttribute("aria-label","Quitar foto");
+    b.onclick = function(){ rep.fotos.splice(i,1); pintarFotos(); cambio(); };
+    d.appendChild(im); d.appendChild(b); c.appendChild(d);
+  });
+  $("fotoAyuda").textContent = rep.fotos.length + " de " + MAX_FOTOS + " fotos. Se comprimen para ahorrar espacio.";
+}
+function pintarGps(){
+  $("gpsTxt").textContent = rep.lat != null ? ("✓ " + rep.lat.toFixed(5) + ", " + rep.lng.toFixed(5) + " (±" + Math.round(rep.precision||0) + " m)") : "";
+}
+function pintarTodo(){
+  document.querySelectorAll("[data-k]").forEach(function(el){ el.value = rep[el.getAttribute("data-k")] || ""; });
+  $("categoria").value = rep.categoria || "";
+  cerrarCombo(false);
+  pintarOpciones(); pintarFotos(); pintarGps(); pintarFirma(); pintarEstado();
+  marcar([]);
+  $("estadoGuardado").textContent = rep.codigo || "";
+}
+
+/* ---------- Eventos de campos ---------- */
+document.querySelectorAll("[data-k]").forEach(function(el){
+  function f(){ rep[el.getAttribute("data-k")] = el.value; el.classList.remove("falta"); cambio(); }
+  el.addEventListener("input", f); el.addEventListener("change", f);
+});
+document.querySelectorAll("[data-grupo]").forEach(function(g){
+  g.addEventListener("click", function(e){
+    var b = e.target.closest(".op"); if(!b) return;
+    rep[g.getAttribute("data-grupo")] = b.getAttribute("data-v");
+    g.classList.remove("falta"); pintarOpciones(); cambio();
+  });
+});
+
+/* ---------- Lista que se filtra al escribir ---------- */
+var CAT_NORM = CATEGORIAS.map(norm);
+var cInput = $("categoria"), cLista = $("comboLista");
+function filtrarCat(q){
+  var t = norm(q).split(/\s+/).filter(Boolean), r = [];
+  CATEGORIAS.forEach(function(c, i){
+    var n = CAT_NORM[i];
+    if(t.every(function(x){ return n.indexOf(x) >= 0; })) r.push({ c:c, s:(t.length && n.indexOf(t[0]) === 0) ? 0 : 1 });
+  });
+  r.sort(function(a, b){ return a.s - b.s; });
+  return r.map(function(x){ return x.c; });
+}
+function mostrarCombo(){
+  var res = filtrarCat(cInput.value);
+  cLista.innerHTML = "";
+  if(!res.length){ cLista.innerHTML = '<li class="nada">Sin coincidencias. Prueba con otra palabra.</li>'; }
+  else res.forEach(function(c){
+    var li = document.createElement("li"); li.setAttribute("role","option"); li.textContent = c;
+    li.addEventListener("click", function(){ elegirCat(c); });
+    cLista.appendChild(li);
+  });
+  cLista.classList.add("ver");
+  $("comboCuenta").textContent = res.length + " de " + CATEGORIAS.length + " opciones";
+}
+function cerrarCombo(validar){
+  cLista.classList.remove("ver");
+  if(validar && cInput.value && CATEGORIAS.indexOf(cInput.value) < 0){
+    cInput.value = ""; rep.categoria = ""; cambio(); toast("Elige una opción de la lista", true);
+  }
+  if(CATEGORIAS.indexOf(cInput.value) >= 0) $("comboCuenta").textContent = "✓ Seleccionado";
+}
+function elegirCat(c){
+  rep.categoria = c; cInput.value = c; cInput.classList.remove("falta");
+  cerrarCombo(false); cInput.blur(); cambio();
+}
+cInput.addEventListener("focus", function(){ cInput.select(); mostrarCombo(); });
+cInput.addEventListener("input", function(){
+  rep.categoria = CATEGORIAS.indexOf(cInput.value) >= 0 ? cInput.value : "";
+  cInput.classList.remove("falta"); mostrarCombo(); cambio();
+});
+cInput.addEventListener("keydown", function(e){
+  if(e.key === "Enter"){ e.preventDefault(); var r = filtrarCat(cInput.value); if(r.length === 1) elegirCat(r[0]); else cInput.blur(); }
+});
+document.addEventListener("pointerdown", function(e){
+  if(cLista.classList.contains("ver") && !e.target.closest("#combo")) cerrarCombo(true);
+});
+
+/* ---------- Autoguardado ---------- */
+function cambio(){
+  rep.actualizado = Date.now();
+  pintarEstado();
+  clearTimeout(guardadoTimer);
+  guardadoTimer = setTimeout(guardarSilencioso, 500);
+}
+function guardarSilencioso(){
+  if(!rep || !tieneContenido()) return Promise.resolve();
+  if(!rep.codigo) rep.codigo = siguienteCodigo();
+  localStorage.setItem("racs:perfil", JSON.stringify({ nombre:rep.nombre, dni:rep.dni, cargo:rep.cargo, empresa:rep.empresa, areaRep:rep.areaRep }));
+  return dbGuardar(rep).then(function(){
+    $("estadoGuardado").textContent = rep.codigo + " · guardado " + horaAhora();
+    return refrescarLista();
+  }).catch(function(){ toast("No se pudo guardar en el teléfono (¿poco espacio?)", true); });
+}
+window.addEventListener("pagehide", function(){ if(rep && tieneContenido()) guardarSilencioso(); });
+document.addEventListener("visibilitychange", function(){ if(document.hidden && rep && tieneContenido()) guardarSilencioso(); });
+
+/* ---------- Fotos ---------- */
+function comprimir(file){
+  return new Promise(function(res, rej){
+    var url = URL.createObjectURL(file), im = new Image();
+    im.onload = function(){
+      var s = Math.min(1, 1280 / Math.max(im.width, im.height));
+      var c = document.createElement("canvas"); c.width = Math.round(im.width*s); c.height = Math.round(im.height*s);
+      c.getContext("2d").drawImage(im, 0, 0, c.width, c.height);
+      URL.revokeObjectURL(url); res(c.toDataURL("image/jpeg", 0.75));
+    };
+    im.onerror = function(){ URL.revokeObjectURL(url); rej(); };
+    im.src = url;
+  });
+}
+function agregarFotos(files){
+  var arr = Array.prototype.slice.call(files || []), libres = MAX_FOTOS - rep.fotos.length;
+  if(!arr.length) return;
+  if(libres <= 0){ toast("Máximo " + MAX_FOTOS + " fotos", true); return; }
+  if(arr.length > libres){ toast("Solo se agregarán " + libres + " foto(s)", true); arr = arr.slice(0, libres); }
+  arr.reduce(function(p, f){
+    return p.then(function(){
+      return comprimir(f).then(function(d){ rep.fotos.push(d); pintarFotos(); })
+        .catch(function(){ toast("No se pudo leer una foto. Prueba con otra.", true); });
+    });
+  }, Promise.resolve()).then(cambio);
+}
+$("inFoto").addEventListener("change", function(){ agregarFotos(this.files); this.value = ""; });
+$("inGaleria").addEventListener("change", function(){ agregarFotos(this.files); this.value = ""; });
+
+/* ---------- GPS ---------- */
+$("btnGps").onclick = function(){
+  if(!navigator.geolocation){ toast("Este equipo no tiene GPS disponible", true); return; }
+  var b = this; b.disabled = true; $("gpsTxt").textContent = "Buscando señal…";
+  navigator.geolocation.getCurrentPosition(function(p){
+    rep.lat = p.coords.latitude; rep.lng = p.coords.longitude; rep.precision = p.coords.accuracy;
+    pintarGps(); b.disabled = false; cambio();
+  }, function(){
+    $("gpsTxt").textContent = ""; b.disabled = false; toast("Sin señal GPS. Escribe el lugar a mano.", true);
+  }, { enableHighAccuracy:true, timeout:15000, maximumAge:30000 });
+};
+
+/* ---------- Dictado por voz ---------- */
+(function(){
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR) return;
+  var btn = $("btnMic"), rec = null, activo = false;
+  btn.classList.add("ver");
+  btn.onclick = function(){
+    if(activo){ rec.stop(); return; }
+    rec = new SR(); rec.lang = "es-PE"; rec.interimResults = false; rec.continuous = true;
+    rec.onresult = function(e){
+      var t = ""; for(var i = e.resultIndex; i < e.results.length; i++){ if(e.results[i].isFinal) t += e.results[i][0].transcript; }
+      if(t){ var d = $("descripcion"); d.value = (d.value ? d.value.replace(/\s*$/, " ") : "") + t.trim(); rep.descripcion = d.value; cambio(); }
+    };
+    rec.onend = function(){ activo = false; btn.classList.remove("on"); };
+    rec.onerror = function(){ activo = false; btn.classList.remove("on"); toast("El dictado necesita internet en algunos equipos", true); };
+    try{ rec.start(); activo = true; btn.classList.add("on"); }catch(e){}
+  };
+})();
+
+/* ---------- Firma ---------- */
+var fc = $("firma"), fx = fc.getContext("2d"), dibujando = false;
+function ajustarFirma(){
+  var dpr = window.devicePixelRatio || 1, r = fc.getBoundingClientRect();
+  if(!r.width) return;
+  fc.width = Math.round(r.width * dpr); fc.height = Math.round(r.height * dpr);
+  fx.setTransform(dpr,0,0,dpr,0,0); fx.lineWidth = 2.8; fx.lineCap = "round"; fx.lineJoin = "round"; fx.strokeStyle = "#000";
+  pintarFirma();
+}
+function pintarFirma(){
+  var r = fc.getBoundingClientRect();
+  if(r.width){
+    fx.clearRect(0, 0, r.width, r.height);
+    if(rep && rep.firma){ var im = new Image(); im.onload = function(){ fx.drawImage(im, 0, 0, r.width, r.height); }; im.src = rep.firma; }
+  }
+  $("firmaHint").style.display = (rep && rep.firma) ? "none" : "";
+}
+function punto(e){ var r = fc.getBoundingClientRect(); return { x:e.clientX - r.left, y:e.clientY - r.top }; }
+fc.addEventListener("pointerdown", function(e){
+  e.preventDefault(); fc.setPointerCapture(e.pointerId); dibujando = true;
+  var p = punto(e); fx.beginPath(); fx.moveTo(p.x, p.y); fx.lineTo(p.x + .1, p.y + .1); fx.stroke();
+  $("firmaHint").style.display = "none";
+});
+fc.addEventListener("pointermove", function(e){ if(!dibujando) return; e.preventDefault(); var p = punto(e); fx.lineTo(p.x, p.y); fx.stroke(); });
+function finFirma(){ if(!dibujando) return; dibujando = false; rep.firma = fc.toDataURL("image/png"); cambio(); }
+fc.addEventListener("pointerup", finFirma); fc.addEventListener("pointercancel", finFirma);
+$("btnBorrarFirma").onclick = function(){ rep.firma = ""; pintarFirma(); cambio(); };
+window.addEventListener("resize", function(){ if(paso === 3 && $("v-form").classList.contains("on")) ajustarFirma(); });
+
+/* ---------- Navegación ---------- */
+function mostrarVista(v){
+  ["home","form","lista"].forEach(function(n){ $("v-" + n).classList.toggle("on", n === v); });
+  $("btnInicio").style.display = v === "home" ? "none" : "";
+  $("pasosWrap").style.display = v === "form" ? "" : "none";
+  $("barra").classList.toggle("ver", v === "form");
+  $("tituloApp").innerHTML = '<small>Sierra Antapite · SSO</small>' + (v === "lista" ? "Historial" : "RACS");
+  window.scrollTo(0, 0);
+}
+function irPaso(n){
+  cerrarCombo(true);
+  paso = Math.max(1, Math.min(3, n));
+  document.querySelectorAll(".paso").forEach(function(p){ p.classList.toggle("on", p.getAttribute("data-paso") === String(paso)); });
+  var pts = $("pasos").children;
+  for(var i = 0; i < 3; i++){ pts[i].className = (i + 1 === paso) ? "on" : (i + 1 < paso ? "hecho" : ""); }
+  $("pasoTitulo").textContent = TITULOS[paso];
+  $("btnAtras").style.visibility = paso === 1 ? "hidden" : "visible";
+  var sig = $("btnSig");
+  if(paso === 3){ sig.className = "btn btn-ok"; sig.textContent = "Generar PDF / imagen"; }
+  else { sig.className = "btn btn-pri"; sig.textContent = "Siguiente"; }
+  window.scrollTo(0, 0);
+  if(paso === 3) setTimeout(ajustarFirma, 40);
+}
+function abrirFormulario(r){ rep = r; pintarTodo(); mostrarVista("form"); irPaso(1); }
+$("hNuevo").onclick = function(){ abrirFormulario(nuevoReporte()); };
+$("hLista").onclick = function(){ refrescarLista().then(function(){ mostrarVista("lista"); pintarLista(); }); };
+$("btnInicio").onclick = function(){
+  var p = ($("v-form").classList.contains("on") && tieneContenido()) ? guardarSilencioso() : Promise.resolve();
+  p.then(function(){ return refrescarLista(); }).then(function(){ mostrarVista("home"); });
+};
+$("btnAtras").onclick = function(){ irPaso(paso - 1); };
+$("btnSig").onclick = function(){
+  if(paso < 3){
+    var f = faltantesDe(rep).filter(function(k){ return PASO_DE[k] === paso; });
+    if(f.length){ marcar(f); var e = elDe(f[0]); if(e) e.scrollIntoView({ behavior:"smooth", block:"center" }); toast("Completa los campos marcados en rojo", true); return; }
+    marcar([]); irPaso(paso + 1); return;
+  }
+  generarPDF();
+};
+$("btnGuardarSalir").onclick = function(){
+  if(!tieneContenido()){ toast("Aún no hay nada que guardar", true); return; }
+  var f = faltantesDe(rep);
+  guardarSilencioso().then(function(){
+    toast(f.length ? "Guardado como borrador" : "Reporte guardado ✓");
+    return refrescarLista();
+  }).then(function(){ mostrarVista("home"); });
+};
+$("hContinuar").onclick = function(){
+  var b = lista.filter(function(r){ return faltantesDe(r).length; })[0];
+  if(b) abrirFormulario(JSON.parse(JSON.stringify(b)));
+};
+
+/* ---------- Historial ---------- */
+function refrescarLista(){
+  return dbTodos().then(function(t){
+    lista = (t || []).map(completar).sort(function(a,b){ return b.actualizado - a.actualizado; });
+    $("contador").textContent = lista.length;
+    var bor = lista.filter(function(r){ return faltantesDe(r).length; })[0], hc = $("hContinuar");
+    if(bor){ hc.style.display = ""; hc.textContent = "Continuar borrador · " + bor.codigo; } else hc.style.display = "none";
+    if($("v-lista").classList.contains("on")) pintarLista();
+  });
+}
+function fechasDisponibles(){
+  var m = {}; lista.forEach(function(r){ if(r.fecha) m[r.fecha] = (m[r.fecha] || 0) + 1; });
+  return Object.keys(m).sort().reverse().map(function(f){ return { f:f, n:m[f] }; });
+}
+function pintarLista(){
+  var sel = $("fFecha"), actual = sel.value, fs = fechasDisponibles();
+  sel.innerHTML = '<option value="">Todas las fechas</option>' + fs.map(function(x){ return '<option value="'+x.f+'">'+fechaLarga(x.f)+' ('+x.n+')</option>'; }).join("");
+  sel.value = fs.some(function(x){ return x.f === actual; }) ? actual : "";
+  var fecha = sel.value;
+  var delDia = lista.filter(function(r){ return !fecha || r.fecha === fecha; });
+  var compl = delDia.filter(function(r){ return !faltantesDe(r).length; }).length;
+  $("resumenDia").textContent = (fecha ? fechaLarga(fecha) : "Todas las fechas") + ": " + delDia.length + " reporte(s), " + compl + " completo(s). El botón del día junta los completos en un solo PDF y en imágenes.";
+  var c = $("lista");
+  var items = delDia.filter(function(r){
+    if(filtroActual === "todos") return true;
+    if(filtroActual === "borrador") return faltantesDe(r).length > 0;
+    return r.riesgo === filtroActual;
+  });
+  if(!items.length){ c.innerHTML = '<div class="vacio">No hay reportes aquí todavía.</div>'; return; }
+  c.innerHTML = "";
+  items.forEach(function(r){
+    var d = document.createElement("div"), e = estadoDe(r);
+    d.className = "item r-" + (r.riesgo || "");
+    d.innerHTML =
+      '<div class="cab"><b>'+esc(r.codigo)+'</b><span>'+esc(fechaLarga(r.fecha))+' '+esc(r.hora)+'</span></div>'+
+      '<div class="tit">'+esc(r.categoria || "(sin clasificación)")+'</div>'+
+      '<div class="det">'+esc(r.descripcion || "Sin descripción")+'</div>'+
+      '<div><span class="tag '+e.c+'">'+esc(e.t)+'</span>'+
+      (r.riesgo ? '<span class="tag">Riesgo '+esc(r.riesgo)+'</span>' : '')+
+      (r.area ? '<span class="tag">'+esc(r.area)+'</span>' : '')+
+      (r.fotos.length ? '<span class="tag">'+r.fotos.length+' foto(s)</span>' : '')+'</div><div class="acc"></div>';
+    var acc = d.querySelector(".acc");
+    function bt(txt, cls, fn){ var b = document.createElement("button"); b.type = "button"; b.className = "btn btn-peq " + cls; b.textContent = txt; b.onclick = fn; acc.appendChild(b); }
+    bt("Abrir", "btn-sec", function(){ abrirFormulario(JSON.parse(JSON.stringify(r))); });
+    bt("PDF / Imagen", "btn-ok", function(){
+      if(faltantesDe(r).length){ toast("Este reporte está incompleto. Ábrelo y termínalo.", true); return; }
+      crearSalida([r], false);
+    });
+    bt("Eliminar", "btn-peligro", function(){
+      if(!confirm("¿Eliminar " + r.codigo + "? No se puede deshacer.")) return;
+      dbBorrar(r.id).then(function(){ refrescarLista(); toast("Reporte eliminado"); });
+    });
+    c.appendChild(d);
+  });
+}
+$("fFecha").onchange = pintarLista;
+document.querySelectorAll(".filtro").forEach(function(b){
+  b.onclick = function(){
+    filtroActual = b.getAttribute("data-f");
+    document.querySelectorAll(".filtro").forEach(function(x){ x.classList.toggle("on", x === b); });
+    pintarLista();
+  };
+});
+$("btnPdfDia").onclick = function(){
+  var fecha = $("fFecha").value || hoyISO();
+  var del = lista.filter(function(r){ return r.fecha === fecha; });
+  var ok = del.filter(function(r){ return !faltantesDe(r).length; }).sort(function(a,b){ return a.hora < b.hora ? -1 : 1; });
+  if(!ok.length){ toast("No hay reportes completos el " + fechaLarga(fecha), true); return; }
+  if(del.length > ok.length) toast((del.length - ok.length) + " borrador(es) no se incluyen");
+  crearSalida(ok, true, fecha);
+};
+
+/* ---------- CSV ---------- */
+function descargarBlob(blob, nombre){
+  var a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = nombre;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); }, 4000);
+}
+$("btnCsv").onclick = function(){
+  if(!lista.length){ toast("No hay reportes para exportar", true); return; }
+  var cols = ["codigo","fecha","hora","tipo","categoria","area","ubicacion","riesgo","riesgoCritico","descripcion","acciones","dni","nombre","cargo","empresa","areaRep","repNombre","repEmpresa","repArea","lat","lng"];
+  var filas = [cols.join(",")];
+  lista.forEach(function(r){
+    filas.push(cols.map(function(c){ var v = r[c] == null ? "" : String(r[c]); return '"' + v.replace(/"/g,'""').replace(/\r?\n/g," ") + '"'; }).join(","));
+  });
+  descargarBlob(new Blob(["\uFEFF" + filas.join("\r\n")], { type:"text/csv;charset=utf-8" }), "RACS_" + hoyISO() + ".csv");
+};
+
+/* ---------- Plantillas del PDF / imagen ---------- */
+function htmlPDF(r){
+  function L(t){ return '<div class="p-l">'+t+'</div>'; }
+  function V(t, cls){ return '<div class="p-v '+(cls||'')+'">'+esc(t || "—")+'</div>'; }
+  var fotos = r.fotos.length
+    ? '<div class="p-fotos'+(r.fotos.length === 1 ? ' uno' : '')+'">'+r.fotos.map(function(s){ return '<img src="'+s+'">'; }).join("")+'</div>'
+    : V("Sin fotos");
+  var gps = r.lat != null ? L("Coordenadas GPS") + V(r.lat.toFixed(6)+", "+r.lng.toFixed(6)+"  (± "+Math.round(r.precision||0)+" m)") : "";
+  return '<div class="p-sheet">'+
+    '<div class="p-head"><div><div class="a">Sierra Antapite · Seguridad y Salud Ocupacional</div><div class="b">REPORTE DE ACTO / CONDICIÓN SUBESTÁNDAR</div></div>'+
+    '<div class="c"><b>'+esc(r.codigo || "RACS")+'</b>'+esc(fechaLarga(r.fecha))+' · '+esc(r.hora)+'</div></div>'+
+    '<div class="p-grid">'+
+      '<div class="p-card">'+
+        L("Tipo")+V((r.tipo||"").toUpperCase())+
+        '<div class="p-sub">REPORTANTE</div>'+
+        L("DNI")+V(r.dni)+L("Nombres")+V((r.nombre||"").toUpperCase())+
+        '<div class="p-2"><div>'+L("Empresa")+V((r.empresa||"").toUpperCase())+'</div><div>'+L("Área")+V(r.areaRep)+'</div></div>'+
+        L("Cargo")+V(r.cargo)+
+        '<div class="p-sub">REPORTADO</div>'+
+        L("Nombres")+V((r.repNombre||"").toUpperCase())+
+        '<div class="p-2"><div>'+L("Empresa")+V((r.repEmpresa||"").toUpperCase())+'</div><div>'+L("Área")+V(r.repArea)+'</div></div>'+
+      '</div>'+
+      '<div class="p-card">'+
+        L("Clasificación tipo causa")+V(r.categoria)+
+        L("Lugar")+V((r.ubicacion||"").toUpperCase())+
+        '<div class="p-2"><div>'+L("Área")+V(r.area)+'</div><div>'+L("Fecha y hora")+V(fechaLarga(r.fecha)+"  "+r.hora)+'</div></div>'+
+        '<div class="p-2"><div>'+L("Nivel de riesgo")+'<div class="p-v p-risk p-r-'+esc(r.riesgo)+'">'+esc(r.riesgo)+'</div></div><div>'+L("Riesgos críticos")+V(r.riesgoCritico)+'</div></div>'+
+        gps+
+        L("Descripción")+V((r.descripcion||"").toUpperCase(), "big")+
+        L("Acciones")+V((r.acciones||"").toUpperCase(), "big")+
+      '</div>'+
+      '<div class="p-card">'+
+        L("Evidencia fotográfica ("+r.fotos.length+")")+fotos+
+        '<div class="p-firma">'+L("Firma del reportante")+(r.firma ? '<img src="'+r.firma+'">' : V("—"))+'<div style="font-size:16px;font-weight:700;margin-top:4px">'+esc(r.nombre)+'</div></div>'+
+      '</div>'+
+    '</div>'+
+    '<div class="p-pie">'+esc(r.codigo)+' · Elaborado por '+esc(r.nombre)+(r.cargo ? ' ('+esc(r.cargo)+')' : '')+' · RACS Sierra Antapite SSO</div>'+
+  '</div>';
+}
+function htmlResumen(rs, fecha){
+  var n = { Alto:0, Medio:0, Bajo:0 }; rs.forEach(function(r){ if(n[r.riesgo] != null) n[r.riesgo]++; });
+  var filas = rs.map(function(r, i){
+    return '<tr><td>'+(i+1)+'</td><td>'+esc(r.hora)+'</td><td>'+esc(r.codigo)+'</td><td>'+esc(r.categoria)+'</td><td>'+esc(r.area)+'</td><td><b>'+esc(r.riesgo)+'</b></td><td>'+esc(r.nombre)+'</td></tr>';
+  }).join("");
+  return '<div class="p-sheet">'+
+    '<div class="p-head"><div><div class="a">Sierra Antapite · Seguridad y Salud Ocupacional</div><div class="b">RESUMEN DE RACS DEL DÍA</div></div>'+
+    '<div class="c"><b>'+esc(fechaLarga(fecha))+'</b>'+rs.length+' reporte(s)</div></div>'+
+    '<div><span class="p-chip">Alto: '+n.Alto+' · Medio: '+n.Medio+' · Bajo: '+n.Bajo+'</span></div>'+
+    '<table class="p-tab"><thead><tr><th>N°</th><th>Hora</th><th>Código</th><th>Clasificación</th><th>Área</th><th>Riesgo</th><th>Reportante</th></tr></thead><tbody>'+filas+'</tbody></table>'+
+    '<div class="p-pie" style="margin-top:auto;padding-top:16px">RACS Sierra Antapite SSO</div></div>';
+}
+
+/* ---------- Generar PDF / imagen ---------- */
+function esperarImagenes(cont){
+  return Promise.all(Array.prototype.map.call(cont.querySelectorAll("img"), function(im){
+    return im.complete ? Promise.resolve() : new Promise(function(r){ im.onload = im.onerror = r; });
+  }));
+}
+function hojaACanvas(html, escalaMax){
+  var tpl = $("pdfTpl"); tpl.innerHTML = html;
+  return esperarImagenes(tpl).then(function(){
+    var hoja = tpl.firstChild, w = 1100, h = hoja.offsetHeight;
+    var escala = Math.max(1.2, Math.min(escalaMax, Math.sqrt(14000000 / (w * h)), 15000 / Math.max(w, h)));
+    return html2canvas(hoja, {
+      scale:escala, backgroundColor:"#DDE4EB", useCORS:true, windowWidth:1200,
+      onclone:function(d){ var e = d.getElementById("pdfTpl"); if(e){ e.style.left = "0"; e.style.top = "0"; } }
+    });
+  }).then(function(c){ tpl.innerHTML = ""; return c; }, function(e){ tpl.innerHTML = ""; throw e; });
+}
+function canvasToBlob(c, q){
+  return new Promise(function(res){ c.toBlob(res, "image/jpeg", q); });
+}
+function crearSalida(reportes, esDia, fecha){
+  if(!window.html2canvas || !window.jspdf){ toast("El generador de PDF no está disponible. Abre la app con internet una vez.", true); return Promise.resolve(); }
+  var J = window.jspdf.jsPDF, pdf = null, imgs = [];
+  var r0 = reportes[0];
+  var nombre = esDia
+    ? "RACS_" + fecha + "_" + reportes.length + "-reportes.pdf"
+    : "RACS_" + (r0.codigo || hoyISO()) + (r0.nombre ? "_" + slug(r0.nombre) : "") + ".pdf";
+  var baseImg = nombre.replace(/\.pdf$/, "");
+  var paginas = [];
+  if(esDia && reportes.length > 1) paginas.push({ html:htmlResumen(reportes, fecha) });
+  reportes.forEach(function(r){ paginas.push({ html:htmlPDF(r) }); });
+  var escala = reportes.length > 1 ? 1.8 : 2.5, calidad = reportes.length > 1 ? 0.85 : 0.92;
+
+  return paginas.reduce(function(p, pg, i){
+    return p.then(function(){
+      toast("Generando página " + (i + 1) + " de " + paginas.length + "…");
+      return hojaACanvas(pg.html, escala).then(function(canvas){
+        var m = 5, an = 287, al = canvas.height * an / canvas.width, fmt = [an + m*2, al + m*2];
+        var ori = al >= an ? "portrait" : "landscape";
+        if(!pdf) pdf = new J({ orientation:ori, unit:"mm", format:fmt }); else pdf.addPage(fmt, ori);
+        pdf.addImage(canvas.toDataURL("image/jpeg", calidad), "JPEG", m, m, an, al);
+        return canvasToBlob(canvas, 0.9).then(function(b){
+          if(b) imgs.push(new File([b], baseImg + (paginas.length > 1 ? "_p" + (i + 1) : "") + ".jpg", { type:"image/jpeg" }));
+        });
+      });
+    });
+  }, Promise.resolve()).then(function(){
+    var blob = pdf.output("blob");
+    salida = { pdf:new File([blob], nombre, { type:"application/pdf" }), imgs:imgs, reportes:reportes, dia:esDia };
+    $("pdfNombre").textContent = nombre;
+    $("btnCompartir").style.display = (navigator.canShare && navigator.canShare({ files:[salida.pdf] })) ? "" : "none";
+    $("bloqueImg").style.display = imgs.length ? "" : "none";
+    $("sepImg").textContent = imgs.length > 1 ? "Imágenes (" + imgs.length + ")" : "Imagen";
+    $("btnCompImg").style.display = (imgs.length && navigator.canShare && navigator.canShare({ files:imgs })) ? "" : "none";
+    $("modalPdf").classList.add("ver");
+    var ahora = Date.now();
+    return Promise.all(reportes.map(function(r){ r.pdfHecho = ahora; return dbGuardar(r); }));
+  }).then(function(){ if(rep && rep.id && reportes.some(function(r){ return r.id === rep.id; })){ rep.pdfHecho = Date.now(); pintarEstado(); } return refrescarLista(); })
+  .catch(function(e){ console.warn(e); toast("No se pudo generar. Intenta con menos fotos.", true); });
+}
+function generarPDF(){
+  var f = faltantesDe(rep);
+  if(f.length){
+    marcar(f);
+    var p = Math.min.apply(null, f.map(function(k){ return PASO_DE[k]; }));
+    irPaso(p);
+    setTimeout(function(){ var e = elDe(f.filter(function(k){ return PASO_DE[k] === p; })[0]); if(e) e.scrollIntoView({ behavior:"smooth", block:"center" }); }, 80);
+    toast("Faltan campos obligatorios (en rojo)", true);
+    return;
+  }
+  var b = $("btnSig"); b.disabled = true;
+  guardarSilencioso().then(function(){ return crearSalida([rep], false); }).then(function(){ b.disabled = false; }, function(){ b.disabled = false; });
+}
+function compartir(files){
+  if(!files || !files.length) return;
+  var rs = salida.reportes, t = salida.dia
+    ? "RACS del " + fechaLarga(rs[0].fecha) + " · " + rs.length + " reporte(s) · Sierra Antapite SSO"
+    : "RACS " + rs[0].codigo + " · " + rs[0].categoria + " · Riesgo " + rs[0].riesgo + " · " + rs[0].ubicacion;
+  navigator.share({ files:files, title:"RACS", text:t }).catch(function(e){
+    if(e && e.name !== "AbortError"){ files.forEach(function(f, i){ setTimeout(function(){ descargarBlob(f, f.name); }, i * 500); }); toast("No se pudo compartir; se descargó el archivo"); }
+  });
+}
+$("btnCompartir").onclick = function(){ if(salida) compartir([salida.pdf]); };
+$("btnCompImg").onclick = function(){ if(salida) compartir(salida.imgs); };
+$("btnDescargar").onclick = function(){ if(salida) descargarBlob(salida.pdf, salida.pdf.name); };
+$("btnDescImg").onclick = function(){
+  if(!salida || !salida.imgs.length) return;
+  salida.imgs.forEach(function(f, i){ setTimeout(function(){ descargarBlob(f, f.name); }, i * 600); });
+};
+$("btnCerrarPdf").onclick = function(){ $("modalPdf").classList.remove("ver"); };
+
+/* ---------- Conexión y modo sin internet ---------- */
+function estadoRed(){ var n = $("net"); n.textContent = navigator.onLine ? "En línea" : "Sin conexión"; n.className = "net" + (navigator.onLine ? "" : " off"); }
+window.addEventListener("online", estadoRed); window.addEventListener("offline", estadoRed);
+
+function revisarOffline(){
+  var el = $("offTxt");
+  function ok(){ el.className = "offline ok"; el.textContent = "✓ Listo para usar sin internet"; }
+  function no(m){ el.className = "offline"; el.textContent = m; }
+  if(!("serviceWorker" in navigator) || !window.caches){ no("Este navegador no permite modo sin internet. Ábrelo desde Chrome o Safari."); return; }
+  caches.keys().then(function(k){
+    var v = k.filter(function(x){ return x.indexOf("racs-") === 0; }).sort();
+    $("verTxt").textContent = v.length ? "Versión instalada: " + v[v.length - 1] : "";
+  });
+  if(!navigator.serviceWorker.controller){ no(navigator.onLine ? "Activando modo sin internet… recarga la página una vez." : "Abre esta página con internet una vez para activar el modo sin internet."); return; }
+  Promise.all(LIBS.map(function(u){ return caches.match(u); })).then(function(r){
+    if(r.every(Boolean)) ok(); else no(navigator.onLine ? "Descargando herramientas del PDF… espera unos segundos y recarga." : "Faltan las herramientas del PDF. Abre la app con internet una vez.");
+  });
+}
+if("serviceWorker" in navigator){
+  window.addEventListener("load", function(){
+    navigator.serviceWorker.register("sw.js").then(function(reg){
+      reg.update();
+      setTimeout(revisarOffline, 2500);
+    }).catch(function(){ revisarOffline(); });
+    navigator.serviceWorker.addEventListener("controllerchange", function(){ setTimeout(revisarOffline, 2500); });
+  });
+}
+
+/* ---------- Inicio ---------- */
+(function init(){
+  estadoRed();
+  rep = nuevoReporte();
+  refrescarLista();
+  revisarOffline();
+  if(navigator.storage && navigator.storage.persist) navigator.storage.persist();
+})();
+</script>
+</body>
+</html>
